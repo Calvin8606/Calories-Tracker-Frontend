@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8080/auth"; // Adjusted base URL
+const BASE_URL = "http://localhost:8080/api/user"; // Adjusted base URL
 
 export const registerUser = async (data: {
   firstName: string;

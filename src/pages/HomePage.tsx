@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 
-interface isAuthenticated {
+interface HomePageProps {
   isAuthenticated: boolean;
 }
 
-const HomePage: React.FC = () => {
+const HomePage: React.FC<HomePageProps> = ({ isAuthenticated }) => {
   return (
-    <>
-      {
+    <div>
+      {!isAuthenticated ? (
         <div className="flex flex-col items-center justify-center h-screen pt-24 bg-gray-100">
           <h1 className="text-6xl font-bold mb-8">Welcome</h1>
           <Link to="/login">
@@ -16,8 +16,12 @@ const HomePage: React.FC = () => {
             </button>
           </Link>
         </div>
-      }
-    </>
+      ) : (
+        <div className="flex flex-col items-center justify-center h-screen pt-24 bg-gray-100">
+          <h1 className="text-6xl font-bold mb-8">Ur Logged In!</h1>
+        </div>
+      )}
+    </div>
   );
 };
 

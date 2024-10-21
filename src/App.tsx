@@ -66,7 +66,7 @@ const App: React.FC = () => {
     <div>
       <Navbar isAuthenticated={isAuthenticated} handleLogout={handleLogout}/>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<HomePage isAuthenticated={isAuthenticated} />} />
         <Route path="/register" element={<RegisterPage handleRegister={handleRegister} />} />
         <Route path="/login" element={<LoginPage handleLogin={handleLogin} />} />
       </Routes>
