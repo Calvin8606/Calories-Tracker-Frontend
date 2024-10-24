@@ -1,19 +1,9 @@
 import React, { useState } from "react";
 import CenteredForm from "../components/CenteredForm";
 import { registerUser } from "../apis/api";
+import { useNavigate } from "react-router-dom";
 
-interface RegisterPageProps {
-  handleRegister: (
-    firstName: string,
-    middleName: string,
-    lastName: string,
-    email: string,
-    phoneNumber: string,
-    password: string
-  ) => void;
-}
-
-const RegisterPage: React.FC<RegisterPageProps> = () => {
+const RegisterPage: React.FC = () => {
   const [firstName, setFirstName] = useState<string>("");
   const [middleName, setMiddleName] = useState<string>(""); // Optional
   const [lastName, setLastName] = useState<string>("");
@@ -22,6 +12,7 @@ const RegisterPage: React.FC<RegisterPageProps> = () => {
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,15 +28,14 @@ const RegisterPage: React.FC<RegisterPageProps> = () => {
         phoneNumber,
         password,
       });
-
       setSuccess(true);
-      // Clear form fields
       setFirstName("");
       setMiddleName("");
       setLastName("");
       setEmail("");
       setPhoneNumber("");
       setPassword("");
+      navigate("/login");
     } catch (error) {
       console.error("Error registering user:", error);
       setError("Registration failed. Please try again.");

@@ -1,17 +1,32 @@
 import React, { useState } from "react";
 import CenteredForm from "../components/CenteredForm";
+import { loginUser } from "../apis/api";
+import { useNavigate } from "react-router-dom";
 
 interface LoginPageProps {
-  handleLogin: (username: string, password: string) => void;
+  setIsAuthenticated: (value: boolean) => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ handleLogin }) => {
-  const [username, setUsername] = useState<string>("");
+const LoginPage: React.FC<LoginPageProps> = ({ setIsAuthenticated }) => {
+  const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    handleLogin(username, password); // Call the handleLogin prop with the form values
+    try {
+      const result = await loginUser({ email, password });
+      if (result.jwt) {
+        // Save token to local storage
+        localStorage.setItem("token", result.jwt);
+        setIsAuthenticated(true);
+        navigate("/questionnaire");
+      }
+
+      console.log("Login result:", result);
+    } catch (error) {
+      console.error("Login error:", error);
+    }
   };
 
   return (
@@ -19,8 +34,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ handleLogin }) => {
       <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
         <input
           type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           placeholder="Username"
           className="p-3 border rounded-md focus:outline-none focus:border-blue-600"
           required
