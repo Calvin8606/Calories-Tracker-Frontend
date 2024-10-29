@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import CenteredForm from "../components/CenteredForm";
 import { registerUser } from "../apis/api";
 import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
 
 const RegisterPage: React.FC = () => {
   const [firstName, setFirstName] = useState<string>("");
@@ -37,8 +38,13 @@ const RegisterPage: React.FC = () => {
       setPassword("");
       navigate("/login");
     } catch (error) {
-      console.error("Error registering user:", error);
-      setError("Registration failed. Please try again.");
+      const axiosError = error as AxiosError;
+      if (axiosError.response && axiosError.response.status === 409) {
+        setError("User Exists. Please login.");
+      } else {
+        console.error("Error registering user:", error);
+        setError("Registration failed. Please try again.");
+      }
     }
   };
 

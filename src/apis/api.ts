@@ -59,3 +59,25 @@ export const questionnaireInfo = async (data: {
     throw error;
   }
 };
+
+export const getUserProfile = async () => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("Token not found in local storage");
+    return;
+  }
+
+  try {
+    const response = await axios.get(`${BASE_URL}/profile/get`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    const err = error as Error;
+    console.error("Error fetching user profile:", err.message);
+    throw error;
+  }
+};

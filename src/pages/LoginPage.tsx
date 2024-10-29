@@ -5,11 +5,16 @@ import { useNavigate } from "react-router-dom";
 
 interface LoginPageProps {
   setIsAuthenticated: (value: boolean) => void;
+  setIsProfileComplete: (value: boolean) => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ setIsAuthenticated }) => {
+const LoginPage: React.FC<LoginPageProps> = ({
+  setIsAuthenticated,
+  setIsProfileComplete,
+}) => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -17,15 +22,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ setIsAuthenticated }) => {
     try {
       const result = await loginUser({ email, password });
       if (result.jwt) {
+        console.log("Profile complete:", result.profileComplete);
         // Save token to local storage
         localStorage.setItem("token", result.jwt);
         setIsAuthenticated(true);
-        navigate("/questionnaire");
+        if (result.profileComplete) {
+          setIsProfileComplete(true);
+          navigate("/");
+        } else {
+          navigate("/questionnaire");
+        }
       }
-
       console.log("Login result:", result);
     } catch (error) {
       console.error("Login error:", error);
+      setError("Login failed. Please try again.");
     }
   };
 
@@ -54,6 +65,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ setIsAuthenticated }) => {
         >
           Log In
         </button>
+        {error && <div className="text-red-500 mt-2">{error}</div>}
       </form>
     </CenteredForm>
   );

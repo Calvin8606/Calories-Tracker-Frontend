@@ -1,14 +1,22 @@
 import React, { useState } from "react";
 import CenteredForm from "../components/CenteredForm";
 import { questionnaireInfo } from "../apis/api";
+import { useNavigate } from "react-router-dom";
 
-const QuestionnairePage: React.FC = () => {
+interface QuestionnairePageProps {
+  setIsProfileComplete: (value: boolean) => void;
+}
+
+const QuestionnairePage: React.FC<QuestionnairePageProps> = ({
+  setIsProfileComplete,
+}) => {
   const [goal, setGoal] = useState("");
   const [gender, setGender] = useState("");
   const [heightFeet, setHeightFeet] = useState("");
   const [heightInches, setHeightInches] = useState("");
   const [weightLbs, setWeightLbs] = useState("");
   const [activityLevel, setActivityLevel] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +38,8 @@ const QuestionnairePage: React.FC = () => {
         weightLbs: weightLbsValue,
         activityLevel,
       });
+      setIsProfileComplete(true);
+      navigate("/");
 
       console.log({
         goal,
@@ -39,7 +49,6 @@ const QuestionnairePage: React.FC = () => {
         weightLbs,
         activityLevel,
       });
-      alert("Questionnaire submitted!");
     } catch (error) {
       console.error("Questionnaire error:", error);
     }

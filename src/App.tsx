@@ -8,9 +8,11 @@ import QuestionnairePage from "./pages/QuestionnairePage";
 import ErrorPage from "./pages/ErrorPage";
 import { getAuthToken } from "./utils/auth";
 import ProtectedRoute from "./components/ProtectedRoute";
+import SideNavBar from "./components/SideNavBar";
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isProfileComplete, setIsProfileComplete] = useState<boolean>(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,12 +28,17 @@ const App: React.FC = () => {
     // Clear token and update state
     localStorage.removeItem("token");
     setIsAuthenticated(false);
+    setIsProfileComplete(false);
     navigate("/");
   };
 
   return (
     <div>
       <Navbar isAuthenticated={isAuthenticated} handleLogout={handleLogout} />
+      <SideNavBar
+        isAuthenticated={isAuthenticated}
+        isProfileComplete={isProfileComplete}
+      />
       <Routes>
         <Route
           path="/"
@@ -40,13 +47,18 @@ const App: React.FC = () => {
         <Route path="/register" element={<RegisterPage />} />
         <Route
           path="/login"
-          element={<LoginPage setIsAuthenticated={setIsAuthenticated} />}
+          element={
+            <LoginPage
+              setIsAuthenticated={setIsAuthenticated}
+              setIsProfileComplete={setIsProfileComplete}
+            />
+          }
         />
         <Route
           path="/questionnaire"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <QuestionnairePage />
+              <QuestionnairePage setIsProfileComplete={setIsProfileComplete} />
             </ProtectedRoute>
           }
         />
