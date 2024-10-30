@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { getUserProfile } from "../apis/api";
+import SearchBar from "../components/SearchBar";
 
-// Define the interface for user profile data
 interface UserProfile {
   maintenanceCalories: number;
   gainCalories: number;
   lossCalories: number;
-  goal: string; // Added the goal field
+  goal: string;
 }
 
-// Define the interface for food items consumed
 interface FoodItem {
   name: string;
   calories: number;
@@ -17,11 +16,10 @@ interface FoodItem {
 
 const CaloriesTrackerPage: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [foodItems, setFoodItems] = useState<FoodItem[]>([]); // List of consumed items
+  const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [caloriesConsumed, setCaloriesConsumed] = useState<number>(0);
 
   useEffect(() => {
-    // Fetch the user profile
     const fetchUserProfile = async () => {
       try {
         const profileData = await getUserProfile();
@@ -34,7 +32,6 @@ const CaloriesTrackerPage: React.FC = () => {
     fetchUserProfile();
   }, []);
 
-  // Calculate total calories based on the selected goal
   const getTotalCalories = () => {
     if (!userProfile) return 0;
 
@@ -50,28 +47,41 @@ const CaloriesTrackerPage: React.FC = () => {
     }
   };
 
-  // Calculate remaining calories
   const getRemainingCalories = () => {
     const totalCalories = getTotalCalories();
     return totalCalories - caloriesConsumed;
   };
 
-  // Render the header with the calculation
   const renderHeader = () => {
     const totalCalories = getTotalCalories();
     const remainingCalories = getRemainingCalories();
-
     return `${totalCalories} - ${caloriesConsumed} = ${remainingCalories}`;
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 flex flex-col items-center min-h-screen bg-gray-100">
       {userProfile ? (
-        <div>
+        <div className="w-full max-w-lg">
           {/* Header with the calorie calculation */}
           <h1 className="text-center text-2xl font-bold mb-4">
             {renderHeader()}
           </h1>
+
+          {/* SearchBar positioned consistently */}
+          <SearchBar />
+
+          {/* Display consumed food items */}
+          <div className="mt-4 space-y-2 w-full">
+            {foodItems.map((item, index) => (
+              <div
+                key={index}
+                className="p-2 border rounded-md bg-white shadow-md flex justify-between items-center"
+              >
+                <span>{item.name}</span>
+                <span>{item.calories} kcal</span>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <h1 className="text-center text-xl">Loading...</h1>

@@ -81,3 +81,75 @@ export const getUserProfile = async () => {
     throw error;
   }
 };
+
+const SEARCH_URL = 'http://localhost:8080/api/nutrition';
+
+interface FoodItem {
+  tagId?: string;
+  foodName: string;
+  brandName?: string;
+  nixItemId?: string;
+}
+
+interface Nutrient {
+  foodName: string;
+  calories: number;
+  protein: number;
+  brandName?: string;
+  servingWeightGrams: number;
+}
+
+// Function to search food items
+// Function to search food items
+export const searchFood = async (query: string): Promise<FoodItem[]> => {
+  try {
+    const response = await axios.get(`${SEARCH_URL}/search?query=${query}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching search results:', error);
+    throw error;
+  }
+};
+
+// Function to get nutrients for branded items by nixItemId
+export const getBrandedNutrients = async (nixItemId: string): Promise<Nutrient> => {
+  try {
+    const response = await axios.get(`${SEARCH_URL}/food/branded/${nixItemId}/nutrients`);
+    const data = response.data;
+
+    console.log('Branded Nutrient Response:', data); // Log the response for debugging
+
+    return {
+      foodName: data.foodName || '',
+      brandName: data.brandName || '',
+      calories: parseFloat(data.calories) || 0,
+      protein: parseFloat(data.protein) || 0,
+      servingWeightGrams: parseFloat(data.servingWeightGrams) || 0,
+    };
+  } catch (error) {
+    console.error('Error fetching branded nutrients:', error);
+    throw error;
+  }
+};
+
+// Function to get nutrients for common items by foodName
+export const getCommonNutrients = async (foodName: string): Promise<Nutrient> => {
+  try {
+    const response = await axios.post(`${SEARCH_URL}/food/common/${foodName}/nutrients`);
+    console.log('Raw common nutrient response:', response.data); // Add this line
+    
+    const data = response.data;
+
+    console.log('Parsed Common Nutrient Response:', data); // Debugging line
+
+    return {
+      foodName: data.foodName || '',
+      calories: parseFloat(data.calories) || 0,
+      protein: parseFloat(data.protein) || 0,
+      servingWeightGrams: parseFloat(data.servingWeightGrams) || 0,
+    };
+  } catch (error) {
+    console.error('Error fetching common nutrients:', error);
+    throw error;
+  }
+};
