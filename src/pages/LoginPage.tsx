@@ -41,6 +41,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
   };
 
   return (
+   <div className="bg-gray-700">
     <CenteredForm title="Log In Page">
       <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
         <input
@@ -68,6 +69,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
         {error && <div className="text-red-500 mt-2">{error}</div>}
       </form>
     </CenteredForm>
+  </div>
   );
 };
 
