@@ -1,33 +1,43 @@
-import React, { useState } from 'react';
-import { searchFood, getBrandedNutrients, getCommonNutrients } from '../apis/api';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  searchFood,
+  getBrandedNutrients,
+  getCommonNutrients,
+} from "../apis/api";
 
-// Define types for the component
-interface FoodItem {
+// Define the types for SearchBar
+interface SearchResult {
   tagId?: string;
   foodName: string;
   brandName?: string;
   nixItemId?: string;
 }
 
-interface Nutrient {
-  foodName: string;
+interface FoodItem {
+  id?: number;
+  name: string;
   calories: number;
   protein: number;
   servingWeightGrams: number;
 }
 
-const SearchBar: React.FC = () => {
-  const [query, setQuery] = useState<string>('');
-  const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
-  const [nutrientData, setNutrientData] = useState<Nutrient | null>(null);
+interface SearchBarProps {
+  onAddFoodItem: (item: FoodItem) => void;
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({ onAddFoodItem }) => {
+  const [query, setQuery] = useState<string>("");
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
 
     if (value.length > 1) {
-      handleSearch(value); // Fetch results as user types
+      handleSearch(value);
     } else {
       setIsDropdownVisible(false);
       setSearchResults([]);
@@ -40,27 +50,52 @@ const SearchBar: React.FC = () => {
       setSearchResults(results);
       setIsDropdownVisible(true);
     } catch (error) {
-      console.error('Error in handleSearch:', error);
+      console.error("Error in handleSearch:", error);
     }
   };
 
-  const fetchNutrients = async (item: FoodItem) => {
+  const fetchNutrients = async (item: SearchResult) => {
     try {
-      let nutrients: Nutrient;
+      let nutrientData: FoodItem;
       if (item.nixItemId) {
-        // Fetch nutrients for branded items by nixItemId
-        nutrients = await getBrandedNutrients(item.nixItemId);
-        console.log('Branded Nutrient Response:', nutrients);
+        const nutrients = await getBrandedNutrients(item.nixItemId);
+        nutrientData = {
+          name: nutrients.foodName,
+          calories: nutrients.calories,
+          protein: nutrients.protein,
+          servingWeightGrams: nutrients.servingWeightGrams,
+        };
       } else {
-        // Fetch nutrients for common items by foodName
-        nutrients = await getCommonNutrients(item.foodName);
-        console.log('Common Nutrient Response:', nutrients);
+        const nutrients = await getCommonNutrients(item.foodName);
+        nutrientData = {
+          name: nutrients.foodName,
+          calories: nutrients.calories,
+          protein: nutrients.protein,
+          servingWeightGrams: nutrients.servingWeightGrams,
+        };
       }
-      setNutrientData(nutrients);
+      setIsDropdownVisible(false);
+      onAddFoodItem(nutrientData); // Open the modal in CaloriesTrackerPage
     } catch (error) {
-      console.error('Error fetching nutrients:', error);
+      console.error("Error fetching nutrients:", error);
     }
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownVisible(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="flex flex-col items-center w-full max-w-lg mx-auto relative">
@@ -80,9 +115,11 @@ const SearchBar: React.FC = () => {
         </button>
       </div>
 
-      {/* Dropdown for displaying search results */}
       {isDropdownVisible && searchResults.length > 0 && (
-        <div className="absolute top-full left-0 z-20 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-48 overflow-y-auto">
+        <div
+          ref={dropdownRef}
+          className="absolute top-full left-0 z-20 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-48 overflow-y-auto"
+        >
           {searchResults.map((item, index) => (
             <div
               key={index}
@@ -91,20 +128,10 @@ const SearchBar: React.FC = () => {
             >
               <p className="font-bold">{item.foodName}</p>
               <p className="text-sm text-gray-500">
-                Brand: {item.brandName ? item.brandName : 'Common Item'}
+                Brand: {item.brandName ? item.brandName : "Common Item"}
               </p>
             </div>
           ))}
-        </div>
-      )}
-
-      {nutrientData && (
-        <div className="w-full mt-6 p-4 border border-gray-300 rounded-md shadow-md">
-          <h3 className="text-xl font-bold mb-2">Nutrient Information</h3>
-          <p>Food Name: {nutrientData.foodName}</p>
-          <p>Calories: {nutrientData.calories}</p>
-          <p>Protein: {nutrientData.protein}g</p>
-          <p>Serving Weight: {nutrientData.servingWeightGrams}g</p>
         </div>
       )}
     </div>

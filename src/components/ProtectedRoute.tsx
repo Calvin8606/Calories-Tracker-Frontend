@@ -10,7 +10,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   isAuthenticated,
   children,
 }) => {
-  return isAuthenticated ? <>{children}</> : <Navigate to="/error" />;
+  // Check for token in localStorage
+  const token = localStorage.getItem("token");
+
+  // If there’s no token or isAuthenticated is false, redirect
+  if (!token || !isAuthenticated) {
+    return <Navigate to="/error" replace />;
+  }
+
+  // If authenticated, render the children
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;

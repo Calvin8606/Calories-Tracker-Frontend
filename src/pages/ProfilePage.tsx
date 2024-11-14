@@ -1,15 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CenteredForm from "../components/CenteredForm";
-import { updateUserProfile } from "../apis/api";
+import { getUserProfile, updateUserProfile } from "../apis/api";
 import { useNavigate } from "react-router-dom";
 
-interface QuestionnairePageProps {
+interface ProfilePageProps {
   setIsProfileComplete: (value: boolean) => void;
 }
 
-const QuestionnairePage: React.FC<QuestionnairePageProps> = ({
-  setIsProfileComplete,
-}) => {
+const ProfilePage: React.FC<ProfilePageProps> = ({ setIsProfileComplete }) => {
+  const [name, setName] = useState("");
   const [goal, setGoal] = useState("");
   const [gender, setGender] = useState("");
   const [heightFeet, setHeightFeet] = useState("");
@@ -17,6 +16,26 @@ const QuestionnairePage: React.FC<QuestionnairePageProps> = ({
   const [weightLbs, setWeightLbs] = useState("");
   const [activityLevel, setActivityLevel] = useState("");
   const navigate = useNavigate();
+
+  // Fetch existing profile data on mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profileData = await getUserProfile();
+        setName(profileData.firstName);
+        setGoal(profileData.goal);
+        setGender(profileData.gender);
+        setHeightFeet(profileData.heightFeet.toString());
+        setHeightInches(profileData.heightInches.toString());
+        setWeightLbs(profileData.weightLbs.toString());
+        setActivityLevel(profileData.activityLevel);
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,25 +58,22 @@ const QuestionnairePage: React.FC<QuestionnairePageProps> = ({
         activityLevel,
       });
       setIsProfileComplete(true);
-      navigate("/");
-
-      console.log({
-        goal,
-        gender,
-        heightFeet,
-        heightInches,
-        weightLbs,
-        activityLevel,
-      });
+      navigate("/"); // Redirect to home after update
     } catch (error) {
-      console.error("Questionnaire error:", error);
+      console.error("Profile update error:", error);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-700">
+    <div
+      className="min-h-screen flex items-center justify-center bg-gray-700"
+      style={{ marginLeft: "14rem" }} // Adjust for sidebar width (assuming 14rem)
+    >
       <CenteredForm title="">
-        <h1 className="text-4xl font-bold mb-8">Fitness Questionnaire</h1>
+        <h1 className="text-2xl font-bold mb-8 text-center">Hello, {name}!</h1>
+        <h1 className="text-4xl font-bold mb-8 text-center">
+          Update Your Profile
+        </h1>
         <form className="w-full space-y-4" onSubmit={handleSubmit}>
           {/* Goal */}
           <div>
@@ -159,7 +175,7 @@ const QuestionnairePage: React.FC<QuestionnairePageProps> = ({
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
           >
-            Submit
+            Update Profile
           </button>
         </form>
       </CenteredForm>
@@ -167,4 +183,4 @@ const QuestionnairePage: React.FC<QuestionnairePageProps> = ({
   );
 };
 
-export default QuestionnairePage;
+export default ProfilePage;

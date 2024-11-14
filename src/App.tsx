@@ -5,32 +5,42 @@ import Navbar from "./components/NavBar";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import QuestionnairePage from "./pages/QuestionnairePage";
+import ProfilePage from "./pages/ProfilePage";
 import ErrorPage from "./pages/ErrorPage";
-import { getAuthToken } from "./utils/auth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SideNavBar from "./components/SideNavBar";
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isProfileComplete, setIsProfileComplete] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true); // New loading state
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = getAuthToken();
+    const token = localStorage.getItem("token");
     if (token) {
       setIsAuthenticated(true);
+      const profileComplete = JSON.parse(
+        localStorage.getItem("profileComplete") || "false"
+      );
+      setIsProfileComplete(profileComplete);
     } else {
       setIsAuthenticated(false);
     }
+    setLoading(false); // Set loading to false after checking authentication
   }, []);
 
   const handleLogout = () => {
-    // Clear token and update state
     localStorage.removeItem("token");
     setIsAuthenticated(false);
     setIsProfileComplete(false);
     navigate("/");
   };
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return <div>Loading...</div>; // You can style this as needed
+  }
 
   return (
     <div>
@@ -59,6 +69,14 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
               <QuestionnairePage setIsProfileComplete={setIsProfileComplete} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <ProfilePage setIsProfileComplete={setIsProfileComplete} />
             </ProtectedRoute>
           }
         />

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 interface LinkType {
@@ -15,7 +15,12 @@ const SideNavBar: React.FC<NavbarProps> = ({
   isAuthenticated,
   isProfileComplete,
 }) => {
-  // Define links for authenticated users
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(false);
+  }, []);
+
   const authLinks: LinkType[] = [
     { name: "Home", path: "/" },
     { name: "Profile", path: "/profile" },
@@ -24,9 +29,10 @@ const SideNavBar: React.FC<NavbarProps> = ({
     { name: "Graph", path: "/graph" },
   ];
 
+  if (loading) return <div>Loading...</div>;
+
   return isAuthenticated && isProfileComplete ? (
     <nav className="bg-gray-100 text-black fixed top-16 left-0 h-[calc(100%-4rem)] w-56 z-50 flex flex-col shadow-lg border-r border-gray-300">
-      {/* Dynamic Navigation Links */}
       <div className="flex flex-col mt-4 gap-0">
         {authLinks.map((link) => (
           <Link
