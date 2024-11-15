@@ -84,6 +84,65 @@ export const getUserProfile = async () => {
   }
 };
 
+export const getUserDetails = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    console.error("Token not found in local storage");
+    throw new Error("User not authenticated");
+  }
+
+  try {
+    const response = await axios.get(`${BASE_URL}/user/details`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    throw error;
+  }
+};
+
+export const updatePhoneNumber = async (phoneNumber: string) => {
+  const token = localStorage.getItem("token");
+  const response = await axios.put(
+    `${BASE_URL}/user/update-phone`,
+    { phoneNumber },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
+};
+
+export const updatePassword = async (newPassword: string) => {
+  const token = localStorage.getItem("token"); // Ensure the token is correctly retrieved
+  if (!token) {
+    console.error("Token not found");
+    throw new Error("User is not authenticated");
+  }
+
+  try {
+    const response = await axios.put(
+      `${BASE_URL}/user/update-password`,
+      { password: newPassword },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating password:", error);
+    throw error;
+  }
+};
+
 const SEARCH_URL = "http://localhost:8080/api/nutrition";
 
 interface FoodItem {

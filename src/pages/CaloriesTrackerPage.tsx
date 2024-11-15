@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   getUserProfile,
   addFoodEntry,
@@ -61,12 +61,6 @@ const CaloriesTrackerPage: React.FC = () => {
     fetchUserProfile();
   }, []);
 
-  useEffect(() => {
-    if (userProfile) {
-      loadDailyData(date);
-    }
-  }, [date, userProfile]);
-
   const calculateTotalCalories = (profile: UserProfile) => {
     switch (profile.goal) {
       case "maintain":
@@ -80,43 +74,53 @@ const CaloriesTrackerPage: React.FC = () => {
     }
   };
 
-  const loadDailyData = async (targetDate: string) => {
-    if (dailyDataCache[targetDate]) {
-      const cachedData = dailyDataCache[targetDate];
-      setCaloriesConsumed(cachedData.totalCalories);
-      setCaloriesRemaining(
-        calculateTotalCalories(userProfile!) - cachedData.totalCalories
-      );
-      setFoodItems(cachedData.foodEntries);
-      return;
-    }
-
-    try {
-      const dailyCaloriesData = await getCaloriesForDate(targetDate);
-
-      if (dailyCaloriesData && dailyCaloriesData.foodEntries.length > 0) {
-        setCaloriesConsumed(dailyCaloriesData.totalCalories);
+  const loadDailyData = useCallback(
+    async (targetDate: string) => {
+      if (dailyDataCache[targetDate]) {
+        const cachedData = dailyDataCache[targetDate];
+        setCaloriesConsumed(cachedData.totalCalories);
         setCaloriesRemaining(
-          calculateTotalCalories(userProfile!) - dailyCaloriesData.totalCalories
+          calculateTotalCalories(userProfile!) - cachedData.totalCalories
         );
-        setFoodItems(dailyCaloriesData.foodEntries);
-      } else {
+        setFoodItems(cachedData.foodEntries);
+        return;
+      }
+
+      try {
+        const dailyCaloriesData = await getCaloriesForDate(targetDate);
+
+        if (dailyCaloriesData && dailyCaloriesData.foodEntries.length > 0) {
+          setCaloriesConsumed(dailyCaloriesData.totalCalories);
+          setCaloriesRemaining(
+            calculateTotalCalories(userProfile!) -
+              dailyCaloriesData.totalCalories
+          );
+          setFoodItems(dailyCaloriesData.foodEntries);
+        } else {
+          setCaloriesConsumed(0);
+          setCaloriesRemaining(calculateTotalCalories(userProfile!));
+          setFoodItems([]);
+        }
+
+        setDailyDataCache((prevCache) => ({
+          ...prevCache,
+          [targetDate]: dailyCaloriesData,
+        }));
+      } catch (error) {
+        console.error("Error fetching daily calories:", error);
         setCaloriesConsumed(0);
         setCaloriesRemaining(calculateTotalCalories(userProfile!));
         setFoodItems([]);
       }
+    },
+    [dailyDataCache, userProfile]
+  );
 
-      setDailyDataCache((prevCache) => ({
-        ...prevCache,
-        [targetDate]: dailyCaloriesData,
-      }));
-    } catch (error) {
-      console.error("Error fetching daily calories:", error);
-      setCaloriesConsumed(0);
-      setCaloriesRemaining(calculateTotalCalories(userProfile!));
-      setFoodItems([]);
+  useEffect(() => {
+    if (userProfile) {
+      loadDailyData(date);
     }
-  };
+  }, [date, userProfile, loadDailyData]);
 
   const handlePreviousDay = () => {
     const previousDate = new Date(date);
@@ -135,19 +139,33 @@ const CaloriesTrackerPage: React.FC = () => {
 
     try {
       console.log("Adding food item to backend:", foodItemToSend);
-      const response = await addFoodEntry(date, foodItemToSend);
+      await addFoodEntry(date, foodItemToSend);
 
-      console.log("Backend response after adding food item:", response);
+      // Immediately update food items and calories without needing a page reload
+      setFoodItems((prevItems) => {
+        const updatedItems = [...prevItems, foodItemToSend];
+        const updatedCaloriesConsumed = updatedItems.reduce(
+          (total, currentItem) => total + currentItem.calories,
+          0
+        );
 
-      // Clear cache for the current date to force reload
-      setDailyDataCache((prevCache) => {
-        const updatedCache = { ...prevCache };
-        delete updatedCache[date]; // Remove the specific date's cache
-        return updatedCache;
+        setCaloriesConsumed(updatedCaloriesConsumed);
+        setCaloriesRemaining(
+          calculateTotalCalories(userProfile!) - updatedCaloriesConsumed
+        );
+
+        // Update cache
+        setDailyDataCache((prevCache) => ({
+          ...prevCache,
+          [date]: {
+            totalCalories: updatedCaloriesConsumed,
+            foodEntries: updatedItems,
+          },
+        }));
+
+        return updatedItems;
       });
 
-      // Reload data to get updated total and remaining calories
-      await loadDailyData(date);
       setIsModalVisible(false);
       setSelectedFood(null);
       setServings("");
@@ -171,23 +189,29 @@ const CaloriesTrackerPage: React.FC = () => {
       await removeFoodEntry(itemToRemove.id);
 
       // Update local state directly after removal
-      const updatedFoodItems = foodItems.filter((_, i) => i !== index);
-      const updatedCaloriesConsumed = caloriesConsumed - itemToRemove.calories;
-      const updatedCaloriesRemaining =
-        calculateTotalCalories(userProfile!) - updatedCaloriesConsumed;
+      setFoodItems((prevItems) => {
+        const updatedItems = prevItems.filter((_, i) => i !== index);
+        const updatedCaloriesConsumed = updatedItems.reduce(
+          (total, currentItem) => total + currentItem.calories,
+          0
+        );
 
-      setFoodItems(updatedFoodItems);
-      setCaloriesConsumed(updatedCaloriesConsumed);
-      setCaloriesRemaining(updatedCaloriesRemaining);
+        setCaloriesConsumed(updatedCaloriesConsumed);
+        setCaloriesRemaining(
+          calculateTotalCalories(userProfile!) - updatedCaloriesConsumed
+        );
 
-      // Update cache with the modified data
-      setDailyDataCache((prevCache) => ({
-        ...prevCache,
-        [date]: {
-          totalCalories: updatedCaloriesConsumed,
-          foodEntries: updatedFoodItems,
-        },
-      }));
+        // Update cache with the modified data
+        setDailyDataCache((prevCache) => ({
+          ...prevCache,
+          [date]: {
+            totalCalories: updatedCaloriesConsumed,
+            foodEntries: updatedItems,
+          },
+        }));
+
+        return updatedItems;
+      });
     } catch (error) {
       console.error("Failed to remove food item:", error);
     }

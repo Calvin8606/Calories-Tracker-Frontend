@@ -9,6 +9,7 @@ import ProfilePage from "./pages/ProfilePage";
 import ErrorPage from "./pages/ErrorPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SideNavBar from "./components/SideNavBar";
+import SettingsPage from "./pages/SettingsPage";
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -77,6 +78,14 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
               <ProfilePage setIsProfileComplete={setIsProfileComplete} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <SettingsPage />
             </ProtectedRoute>
           }
         />

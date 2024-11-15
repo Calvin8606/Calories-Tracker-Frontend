@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import BackgroundForm from "../components/BackgroundForm";
 import CaloriesTrackerPage from "./CaloriesTrackerPage";
-import { Routes, Route } from "react-router-dom";
 
 interface HomePageProps {
   isAuthenticated: boolean;
@@ -33,9 +32,7 @@ const GuestHomePage: React.FC = () => {
 const AuthHomePage: React.FC = () => {
   return (
     <BackgroundForm>
-      <Routes>
-        <Route path="/" element={<CaloriesTrackerPage />} />
-      </Routes>
+      <CaloriesTrackerPage />
     </BackgroundForm>
   );
 };

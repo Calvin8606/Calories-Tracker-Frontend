@@ -25,8 +25,6 @@ const SideNavBar: React.FC<NavbarProps> = ({
     { name: "Home", path: "/" },
     { name: "Profile", path: "/profile" },
     { name: "Settings", path: "/settings" },
-    { name: "Calendar", path: "/calendar" },
-    { name: "Graph", path: "/graph" },
   ];
 
   if (loading) return <div>Loading...</div>;
