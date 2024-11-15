@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8080/api"; // Adjusted base URL
+const BASE_URL = "http://localhost:8080/api";
 
 export const registerUser = async (data: {
   firstName: string;
@@ -119,7 +119,7 @@ export const updatePhoneNumber = async (phoneNumber: string) => {
 };
 
 export const updatePassword = async (newPassword: string) => {
-  const token = localStorage.getItem("token"); // Ensure the token is correctly retrieved
+  const token = localStorage.getItem("token");
   if (!token) {
     console.error("Token not found");
     throw new Error("User is not authenticated");
@@ -160,8 +160,6 @@ interface Nutrient {
   servingWeightGrams: number;
 }
 
-// Function to search food items
-// Function to search food items
 export const searchFood = async (query: string): Promise<FoodItem[]> => {
   try {
     const response = await axios.get(`${SEARCH_URL}/search?query=${query}`);
@@ -182,7 +180,7 @@ export const getBrandedNutrients = async (
     );
     const data = response.data;
 
-    console.log("Branded Nutrient Response:", data); // Log the response for debugging
+    console.log("Branded Nutrient Response:", data);
 
     return {
       foodName: data.foodName || "",
@@ -293,7 +291,7 @@ export const addFoodEntry = async (date: string, foodItem: FoodItem) => {
   try {
     const response = await axios.post(
       `${BASE_URL}/calories/date/${date}/addFood`,
-      foodItem, // Send foodItem directly without JSON.stringify
+      foodItem,
       {
         headers: {
           "Content-Type": "application/json",

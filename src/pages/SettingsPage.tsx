@@ -15,12 +15,12 @@ const SettingsPage: React.FC = () => {
     const fetchUserDetails = async () => {
       try {
         const userDetails = await getUserDetails();
-        console.log("User Details:", userDetails); // Debug line
+        console.log("User Details:", userDetails);
 
         setFirstName(userDetails.firstName);
         setLastName(userDetails.lastName);
         setEmail(userDetails.email);
-        setPhoneNumber(userDetails.phoneNumber || ""); // Set to empty if null
+        setPhoneNumber(userDetails.phoneNumber || "");
       } catch (error) {
         console.error("Error fetching user details:", error);
       }
@@ -32,7 +32,7 @@ const SettingsPage: React.FC = () => {
   // Update phone number and password
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage(""); // Clear previous messages
+    setMessage("");
 
     try {
       // Update phone number

@@ -67,7 +67,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ setIsProfileComplete }) => {
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-gray-700"
-      style={{ marginLeft: "14rem" }} // Adjust for sidebar width (assuming 14rem)
+      style={{ marginLeft: "14rem" }}
     >
       <CenteredForm title="">
         <h1 className="text-2xl font-bold mb-8 text-center">Hello, {name}!</h1>

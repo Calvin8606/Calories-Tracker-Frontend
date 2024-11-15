@@ -13,7 +13,7 @@ interface ModalProps {
   isVisible: boolean;
   onClose: () => void;
   nutrientData: FoodItem;
-  servings: string; // Use string for the input field
+  servings: string;
   onServingsChange: (value: string) => void;
   onAdd: (item: FoodItem) => void;
 }
@@ -50,7 +50,6 @@ const Modal: React.FC<ModalProps> = ({
           Serving Weight: {adjustedItem.servingWeightGrams}g
         </p>
 
-        {/* Servings input field */}
         <div className="flex items-center mb-4">
           <label className="mr-2">Servings:</label>
           <input
